@@ -230,3 +230,6 @@ endfunction
 
 :vmap <a-a> :call Zalign()<CR>
 :imap <a-a> :call Zalign()<CR>
+
+" python class test
+source $VIMRUNTIME/hellopython.vim
