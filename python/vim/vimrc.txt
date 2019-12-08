@@ -1,0 +1,15 @@
+dddad
+
+
+fds
+
+dfadsdfs
+dsfsds
+dsf
+dsf
+ds:d
+
+input reg[4:0]	dfds  = 23;
+input wire[3:0]	dfs = 45;
+input reg [23:0]	dsfsdsd = 567;
+input reg[]	dfs = 6786;

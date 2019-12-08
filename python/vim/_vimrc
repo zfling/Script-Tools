@@ -1,0 +1,232 @@
+" Vim with all enhancements{{{
+source $VIMRUNTIME/vimrc_example.vim
+
+" Remap a few keys for Windows behavior
+source $VIMRUNTIME/mswin.vim
+" behave mswin
+
+" Use the internal diff if available.
+" Otherwise use the special 'diffexpr' for Windows.
+if &diffopt !~# 'internal'
+  set diffexpr=MyDiff()
+endif"}}}
+function MyDiff()"{{{
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction"}}}
+
+" line number
+set nu
+" 用于正常显示中文注释
+set fileencodings=utf-8,gbk
+
+" Vundle{{{
+set rtp+=$VIMRUNTIME/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'jistr/vim-nerdtree-tabs'
+call vundle#end()"}}}
+
+" NERDTree{{{
+map <F2> :NERDTreeMirror<CR>
+map <F2> :NERDTreeToggle<CR>
+" 显示行号
+let NERDTreeShowLineNumbers=1
+let NERDTreeAutoCenter=1
+" 是否显示隐藏文件
+let NERDTreeShowHidden=1
+" 设置宽度
+let NERDTreeWinSize=21
+" 在终端启动vim时，共享NERDTree
+let g:nerdtree_tabs_open_onconsole_startup=1
+" 忽略一下文件的显示
+let NERDTreeIgnore=['\.pyc','\~$','\.swp']
+" 显示书签列表
+let NERDTreeShowBookmarks=1"}}}
+
+" minibuffer explore{{{
+let g:miniBufExplMapWindowNavVim = 1
+let g:miniBufExplMapWindowNavArrows = 1
+let g:miniBufExplMapCTabSwitchBufs = 1
+let g:miniBufExplModSelTarget = 1 "}}}
+
+" system verilog{{{
+syntax   on           "确定vim打开语法高亮
+filetype on           "打开文件类型检测
+filetype plugin on    "为特定的文件类型允许插件文件的载入
+filetype indent on    "为特定的文件类型载入缩进文件}}}
+" fold折叠{{{
+set foldenable
+set fdm=marker
+" 配色方案
+colorscheme desert
+"===========================}}}
+"查找/替换相关的设置{{{
+"===========================
+set hlsearch "高亮显示查找结果
+set incsearch "增量查找
+"tab"
+""set showtabline=2
+""set tabpagemax=25
+"highlight"
+set cursorcolumn
+set cursorline"}}}
+
+" 跳转映射{{{
+:map <a-,> <c-o>
+:map <a-.> <c-i>"}}}
+
+" ctags
+set ts=4
+set autoindent
+set smartindent
+
+function! Zalign() range
+	echo "align"
+	let l:zfirstline = a:firstline
+	let l:zlastline = a:lastline
+	echo "line ".l:zfirstline."- ".l:zlastline
+	"let path = "par from vimscript into python"
+	"let l:list_var = ["123", "234", "345"]
+python3 <<EOM
+import vim
+import os
+import re
+#var = vim.eval("path")
+#var = "%s, add string in python now "%var
+#vim.command("let path = '%s'"%var)
+#list_vars = vim.eval("l:list_var")
+first_line = int(vim.eval("l:zfirstline"))
+last_line = int(vim.eval("l:zlastline"))
+#list_vars.append("567")
+#print(list_vars)
+#vim.command("let l:list_var = '%s'"%list_vars)
+#print("current buffer:")
+#for line in vim.current.buffer:
+#	print(line)
+#print(first_line)
+#print(last_line)
+#print(type(first_line))
+list_to_align = []
+split_symblos = ["["]
+
+def get_all_align():
+	for line in range(first_line-1,last_line):
+		list_to_align.append(vim.current.buffer[line])
+		#print(vim.current.buffer[line])
+		print(type(vim.current.buffer[line]))
+	#print("list to align : ")
+	#print(list_to_align)
+
+#def get_max_len_of_list(part_list):
+def get_max_len_of_left_part(split_symbol, left_part, right_part):
+	if split_symbol == ";":
+		return max(len(s) for s in left_part)
+	max_len = 0
+	for count in range(len(left_part)):
+		if (len(left_part[count]) > max_len and right_part[count] != ""):
+			max_len = len(left_part[count])
+	return max_len
+
+def align_for_special_symbol(split_symbol):
+	left_part = []
+	right_part = []
+	split_len = 0
+	for line in list_to_align:
+		split_lines = line.split(split_symbol, 1)
+		split_len = len(split_lines)
+		#print("split_len:"+str(split_len))
+		if (split_len == 2):
+			left_part.append(split_lines[0])
+			right_part.append(split_lines[1])
+		else:
+			left_part.append(split_lines[0])
+			right_part.append("")
+	#max_len = max(len(s) for s in left_part not )
+	max_len = get_max_len_of_left_part(split_symbol, left_part, right_part)
+	result = []
+	for count in range(len(list_to_align)):
+		if (right_part[count] != ""):
+			result_line = left_part[count].ljust(max_len)+" "+split_symbol+" "+right_part[count]
+		else:
+			if split_symbol in line:
+				result_line = left_part[count].ljust(max_len)+" "+split_symbol
+			else:
+				result_line = left_part[count].ljust(max_len)
+		result.append(result_line)
+	#for line in result:
+		#print(line)
+	list_to_align.clear()
+	#list_to_align = result
+	for line in result:
+		list_to_align.append(line)
+
+def write_into_buffer():
+	for line in range(first_line-1,last_line):
+		writting_line = list_to_align[line - (first_line - 1)]
+		vim.current.buffer[line] = writting_line
+
+#for line in range(first_line-1,last_line):
+ 	#current_line = vim.command("getline(%d)"%line)
+	#current_line = vim.current.buffer[line]
+	#vim.current.buffer[line] = "hello"
+	#print(current_line)
+#vim.command("py3file G:/code_life/Script-Tools/python/vim/hello.py")
+
+def remove_brackets():
+	result = []
+	for line in list_to_align:
+		result_line = re.sub("(.*)\[( *)\](.*)", "\g<1> \g<2> \g<3>",line)
+		result.append(result_line)
+	list_to_align.clear()
+	for line in result:
+		list_to_align.append(line)
+
+get_all_align()
+align_for_special_symbol("[")
+align_for_special_symbol(":")
+align_for_special_symbol("]")
+align_for_special_symbol("=")
+align_for_special_symbol(";")
+remove_brackets()
+for line in list_to_align:
+	print(line)
+	
+write_into_buffer()
+EOM
+"echo path	
+"echo l:list_var
+
+endfunction
+
+:vmap <a-a> :call Zalign()<CR>
+:imap <a-a> :call Zalign()<CR>

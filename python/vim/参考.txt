@@ -1,0 +1,18 @@
+https://www.oschina.net/translate/how-to-write-vim-plugins-with-python?print
+	使用 Python 编写 vim 插件
+http://vimdoc.sourceforge.net/htmldoc/if_pyth.html#python-vim
+	python-vim
+https://www.w3cschool.cn/vim/8urdaozt.html
+	W3Cschool
+https://blog.csdn.net/smstong/article/details/20831813
+	vim 列表
+https://baijiahao.baidu.com/s?id=1612685553334280590&wfr=spider&for=pc
+	Python给vim加功能
+https://realpython.com/vim-and-python-a-match-made-in-heaven/
+	VIM and Python – A Match Made in Heaven
+https://blog.csdn.net/smstong/article/details/32716863
+	VimScript脚本语言学习
+https://www.jianshu.com/p/e43b50469655
+	vim 稍微高级一些的设置
+nmap <F7> :python3 fortran_complete()<cr>A
+imap <F7> ^[:python3 fortran_complete()<cr>A
